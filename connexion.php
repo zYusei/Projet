@@ -308,6 +308,7 @@
       <button type="submit" class="btn-submit" aria-label="Se connecter à FunCodeLab">Se connecter</button>
 
       <button type="button" class="forgot-password" aria-label="Mot de passe oublié ?">Mot de passe oublié ?</button>
+      <button type="button" class="forgot-password" aria-label="Pas de compte ? Inscrivez-vous">Pas de compte ? Inscrivez-vous</button>
     </form>
 
     <div id="successMessage" class="success-message" role="alert" style="display:none;">
