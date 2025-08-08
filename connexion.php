@@ -28,26 +28,89 @@
 
     body {
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      margin: 0;
+      padding: 0;
       background: linear-gradient(135deg, var(--bleu-vif), var(--orange-vif));
-      padding: 2rem;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .login-container {
-      background: var(--blanc);
-      border-radius: 20px;
-      box-shadow:
-        0 20px 30px var(--shadow-light),
-        0 0 0 1px rgba(0,0,0,0.05);
-      width: 100%;
-      max-width: 420px;
-      padding: 3rem 3.5rem;
-      position: relative;
-      animation: fadeInScale 0.7s ease forwards;
+.main-navbar {
+  background: var(--blanc);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+}
+
+.nav-content {
+  max-width: 1100px;
+  margin: auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--bleu-vif);
+  user-select: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--gris-fonce);
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--orange-vif);
+}
+
+.nav-btn {
+  background-color: var(--orange-vif);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: white !important;
+  transition: background-color 0.3s ease;
+}
+
+.nav-btn:hover {
+  background-color: var(--jaune-moutarde);
+  color: var(--gris-fonce) !important;
+}
+    .nav-btn:focus {
+      background-color: var(--jaune-moutarde);
+      color: var(--gris-fonce);
+      outline: none;
     }
+
+.login-container {
+  background: var(--blanc);
+  border-radius: 20px;
+  box-shadow:
+    0 20px 30px var(--shadow-light),
+    0 0 0 1px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 420px;
+  padding: 3rem 3.5rem;
+  position: relative;
+  animation: fadeInScale 0.7s ease forwards;
+  margin-top: 8rem; /* plus bas qu'avant (6rem -> 8rem) */
+}
+
 
     @keyframes fadeInScale {
       0% {
@@ -127,7 +190,6 @@
       user-select: none;
     }
 
-    /* Monter uniquement l’icône cadenas du mot de passe */
     .input-wrapper svg.icon-password {
       top: 40%;
     }
@@ -163,7 +225,7 @@
       margin-top: 4px;
       font-weight: 600;
       user-select: none;
-      min-height: 1.2em; /* garder l’espace même quand vide */
+      min-height: 1.2em;
     }
 
     .btn-submit {
@@ -195,7 +257,6 @@
       outline-offset: 4px;
     }
 
-    /* Ripple effect on button click */
     .btn-submit::after {
       content: "";
       position: absolute;
@@ -258,6 +319,16 @@
   </style>
 </head>
 <body>
+
+<nav class="main-navbar">
+  <div class="nav-content">
+    <div class="logo">FunCodeLab</div>
+    <ul class="nav-links">
+      <li><a href="index.php">Accueil</a></li>
+      <li><a href="inscription.php" class="nav-btn">Inscription</a></li>
+    </ul>
+  </div>
+</nav>
 
   <main class="login-container" role="main" aria-label="Formulaire de connexion FunCodeLab">
     <header class="login-header">
