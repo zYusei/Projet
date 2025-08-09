@@ -256,6 +256,9 @@
       outline: 3px solid var(--bleu-vif);
       outline-offset: 4px;
     }
+    
+    .muted-link{display:block;text-align:right;font-size:.9rem;color:var(--bleu-vif);font-weight:600;text-decoration:underline;background:none;border:none;padding:0;margin-top:.25rem;cursor:pointer;}
+    .muted-link:hover,.muted-link:focus{color:var(--orange-vif);text-decoration:none;outline:none;}
 
     .btn-submit::after {
       content: "";
@@ -379,7 +382,7 @@
       <button type="submit" class="btn-submit" aria-label="Se connecter à FunCodeLab">Se connecter</button>
 
       <button type="button" class="forgot-password" aria-label="Mot de passe oublié ?">Mot de passe oublié ?</button>
-      <button type="button" class="forgot-password" aria-label="Pas de compte ? Inscrivez-vous">Pas de compte ? Inscrivez-vous</button>
+      <button type="button" class="muted-link" onclick="location.href='inscription.php'">Pas de compte ? Inscrivez-vous</button>
     </form>
 
     <div id="successMessage" class="success-message" role="alert" style="display:none;">
