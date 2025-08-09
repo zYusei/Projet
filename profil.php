@@ -16,9 +16,12 @@ $user = current_user();
 $db = $pdo ?? ($conn ?? null);
 if (!$db) die("Erreur : aucune connexion à la base de données.");
 
-// Base URL absolue pour les redirections
+// Base URL absolue pour les redirections & liens
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
 $base = $protocol . "://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+
+// Sommes-nous sur la page profil ? (pour masquer "Mon profil" dans le menu)
+$onProfile = basename($_SERVER['PHP_SELF']) === 'profil.php';
 
 // Récupère les infos actuelles
 $stmt = $db->prepare("SELECT id, username, email, created_at, avatar_url FROM users WHERE id = :id LIMIT 1");
@@ -135,16 +138,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   --text:#101926; --text-muted:#4a5568;
   --bg-grad-1:#2185ff; --bg-grad-2:#ffb347;
 
-  --surface:#ffffff;      --surface-2:#ffffffc9;
+  --surface:#ffffff; --surface-2:#ffffffc9;
   --glass: rgba(255,255,255,.58);
   --glass-border: rgba(0,0,0,.08);
 
   --input-border:#e7e7e7;
-  --chip-bg:#eef5ff;      --chip-text:#1a5fff;
+  --chip-bg:#eef5ff; --chip-text:#1a5fff;
 
   --card-shadow:0 30px 60px rgba(0,0,0,.12);
 
-  --navbar: #ffffff;      --navbar-shadow: 0 2px 8px rgba(0,0,0,.08);
+  --navbar:#ffffff; --navbar-shadow:0 2px 8px rgba(0,0,0,.08);
 }
 html[data-theme="dark"]{
   --accent:#5aa1ff; --accent-2:#ffb02e; --accent-3:#ffd54d;
@@ -159,28 +162,65 @@ html[data-theme="dark"]{
   --chip-bg:#1e2a44; --chip-text:#9cc2ff;
 
   --card-shadow:0 30px 60px rgba(0,0,0,.5);
-  --navbar:#0f1624; --navbar-shadow: 0 2px 8px rgba(0,0,0,.5);
+  --navbar:#0f1624; --navbar-shadow:0 2px 8px rgba(0,0,0,.5);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 body{min-height:100vh;color:var(--text);background:linear-gradient(135deg,var(--bg-grad-1),var(--bg-grad-2));}
 
-/* NAVBAR */
-.main-navbar{background:var(--navbar);box-shadow:var(--navbar-shadow);position:sticky;top:0;z-index:20;}
-.nav-content{max-width:1100px;margin:auto;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;}
-.logo{font-size:1.6rem;font-weight:700;color:var(--accent);}
-.nav-links{display:flex;gap:1rem;align-items:center;list-style:none;}
-.nav-links a{text-decoration:none;color:var(--text);font-weight:600;opacity:.9}
-.nav-links a:hover{opacity:1}
-.nav-btn{background:var(--accent-2);color:#fff;padding:.5rem 1rem;border-radius:10px;}
-.nav-btn:hover{background:var(--accent-3);color:#222;}
+/* ------------------ NAVBAR ------------------ */
+.main-navbar{
+  background:var(--navbar);
+  box-shadow:var(--navbar-shadow);
+  position:sticky;top:0;z-index:50;
+  /* espace sous la navbar pour décoller le menu */
+  margin-bottom:10px;
+}
+.nav-content{max-width:1100px;margin:auto;padding:.8rem 1rem;display:flex;align-items:center;gap:.75rem;}
+.logo{font-size:1.6rem;font-weight:800;color:var(--accent);text-decoration:none}
+.nav-spacer{flex:1}
 
-/* Toggle thème */
+/* liens */
+.nav-links{display:flex;gap:.8rem;align-items:center;list-style:none;}
+.nav-links a{display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text);font-weight:700;opacity:.9;padding:.45rem .7rem;border-radius:10px;}
+.nav-links a:hover{opacity:1;background:color-mix(in srgb, var(--surface-2) 70%, transparent);}
+.nav-btn{background:var(--accent-2);color:#fff !important;padding:.55rem .9rem;border-radius:12px;font-weight:800;}
+.nav-btn:hover{background:var(--accent-3);color:#222 !important}
+
+/* bouton thème */
 .theme-toggle{display:inline-flex;align-items:center;gap:.5rem;background:transparent;border:1.5px solid var(--glass-border);padding:.35rem .6rem;border-radius:999px;cursor:pointer;color:var(--text);font-weight:700;}
 .theme-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .theme-pill{width:36px;height:20px;background:var(--surface-2);border:1px solid var(--input-border);border-radius:999px;position:relative}
-.theme-knob{position:absolute;top:50%;left:2px;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;background:var(--accent);transition:all .25s ease}
+.theme-knob{position:absolute;top:50%;left:2px;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;background:var(--accent);transition:left .25s ease}
 html[data-theme="dark"] .theme-knob{left:18px}
+
+/* menu utilisateur */
+.nav-user{position:relative}
+.user-btn{display:flex;align-items:center;gap:.6rem;padding:.35rem .6rem;border:1.5px solid var(--glass-border);border-radius:999px;background:var(--surface-2);cursor:pointer}
+.user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800}
+.user-name{font-weight:800;font-size:.95rem;color:var(--text)}
+.dropdown{
+  position:absolute;right:0;top:calc(100% + 12px); /* décollé un peu plus */
+  min-width:190px;background:var(--surface);border:1px solid var(--glass-border);
+  border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.25);padding:.4rem;display:none
+}
+.dropdown.show{display:block}
+.dropdown a{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border-radius:8px;color:var(--text);text-decoration:none;font-weight:700}
+.dropdown a:hover{background:color-mix(in srgb, var(--surface-2) 80%, transparent)}
+.dropdown .sep{height:1px;background:var(--glass-border);margin:.35rem 0}
+
+/* burger mobile */
+.burger{display:none;align-items:center;justify-content:center;width:40px;height:40px;border:1.5px solid var(--glass-border);border-radius:10px;background:transparent;color:var(--text);cursor:pointer}
+.burger span{width:18px;height:2px;background:var(--text);position:relative;display:block}
+.burger span::before,.burger span::after{content:"";position:absolute;left:0;width:18px;height:2px;background:var(--text)}
+.burger span::before{top:-6px}.burger span::after{top:6px}
+
+@media (max-width:860px){
+  .burger{display:flex}
+  .nav-links{position:fixed;inset:56px 10px auto 10px;background:var(--surface);border:1px solid var(--glass-border);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.35);padding:.6rem;display:none;flex-direction:column;gap:.3rem;z-index:60}
+  .nav-links.show{display:flex}
+  .user-name{display:none}
+}
 
 /* COVER */
 .cover{
@@ -287,22 +327,50 @@ small.helper{color:var(--text-muted);margin-top:.25rem}
 <body>
 
 <!-- NAVBAR -->
-<nav class="main-navbar">
+<nav class="main-navbar" role="navigation" aria-label="Navigation principale">
   <div class="nav-content">
-    <div class="logo">FunCodeLab</div>
-    <ul class="nav-links">
-      <li><a href="index.php">Accueil</a></li>
+    <a class="logo" href="<?= htmlspecialchars($base) ?>/index.php">FunCodeLab</a>
+
+    <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="primaryNav">
+      <span></span>
+    </button>
+
+    <div class="nav-spacer"></div>
+
+    <ul id="primaryNav" class="nav-links" aria-hidden="true">
+      <li><a href="<?= htmlspecialchars($base) ?>/index.php">Accueil</a></li>
       <li>
         <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Basculer le thème">
           <span id="themeLabel">Clair</span>
           <span class="theme-pill" aria-hidden="true"><span class="theme-knob"></span></span>
         </button>
       </li>
-      <li><a href="logout.php" class="nav-btn">Se déconnecter</a></li>
+
+      <!-- Menu utilisateur -->
+      <li class="nav-user">
+        <button class="user-btn" id="userBtn" aria-haspopup="menu" aria-expanded="false">
+          <?php if (!empty($userData['avatar_url'])): ?>
+            <img src="<?= htmlspecialchars($userData['avatar_url']) ?>" alt="" class="user-avatar">
+          <?php else: ?>
+            <span class="user-avatar"><?= strtoupper(substr($userData['username'],0,1)) ?></span>
+          <?php endif; ?>
+          <span class="user-name"><?= htmlspecialchars($userData['username']) ?></span>
+        </button>
+        <div class="dropdown" id="userMenu" role="menu" aria-labelledby="userBtn">
+          <a href="<?= htmlspecialchars($base) ?>/index.php" role="menuitem">🏠 Accueil</a>
+          <?php if (!$onProfile): ?>
+            <a href="<?= htmlspecialchars($base) ?>/profil.php" role="menuitem">👤 Mon profil</a>
+          <?php endif; ?>
+          <div class="sep" role="separator"></div>
+          <a href="<?= htmlspecialchars($base) ?>/logout.php" role="menuitem">🚪 Se déconnecter</a>
+        </div>
+      </li>
+
+      <!-- bouton déconnexion visible desktop -->
+      <li class="only-desktop"><a href="<?= htmlspecialchars($base) ?>/logout.php" class="nav-btn">Se déconnecter</a></li>
     </ul>
   </div>
 </nav>
-
 
 <!-- BANDEAU DE COUVERTURE -->
 <div class="cover"></div>
@@ -435,16 +503,41 @@ small.helper{color:var(--text-muted);margin-top:.25rem}
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const savedTheme = localStorage.getItem('theme');
   setTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
-  toggle.addEventListener('click', () => {
+  toggle?.addEventListener('click', () => {
     const mode = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     setTheme(mode, true);
   });
   function setTheme(mode, persist){
     root.setAttribute('data-theme', mode);
-    label.textContent = (mode === 'dark') ? 'Sombre' : 'Clair';
-    toggle.setAttribute('aria-pressed', mode === 'dark' ? 'true' : 'false');
+    if (label) label.textContent = (mode === 'dark') ? 'Sombre' : 'Clair';
+    if (toggle) toggle.setAttribute('aria-pressed', mode === 'dark' ? 'true' : 'false');
     if (persist) localStorage.setItem('theme', mode);
   }
+
+  // ---------- NAV (burger) ----------
+  const burger = document.getElementById('burger');
+  const nav    = document.getElementById('primaryNav');
+  const closeNav = ()=>{ nav?.classList.remove('show'); burger?.setAttribute('aria-expanded','false'); nav?.setAttribute('aria-hidden','true'); };
+  burger?.addEventListener('click', ()=>{
+    const open = nav.classList.toggle('show');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+  });
+  window.addEventListener('resize', ()=>{ if (window.innerWidth>860) closeNav(); });
+  document.addEventListener('click', (e)=>{ if(window.innerWidth<=860 && !nav.contains(e.target) && !burger.contains(e.target)) closeNav(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeNav(); });
+
+  // ---------- Menu utilisateur ----------
+  const userBtn = document.getElementById('userBtn');
+  const userMenu= document.getElementById('userMenu');
+  const closeUser = ()=>{ userMenu?.classList.remove('show'); userBtn?.setAttribute('aria-expanded','false'); };
+  userBtn?.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const open = userMenu.classList.toggle('show');
+    userBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', (e)=>{ if(userMenu && !userMenu.contains(e.target) && !userBtn.contains(e.target)) closeUser(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeUser(); });
 
   // ---------- Progress ring ----------
   const prog = document.getElementById('progress');
@@ -473,13 +566,13 @@ small.helper{color:var(--text-muted);margin-top:.25rem}
     r.readAsDataURL(file);
   };
 
-  dz.addEventListener('click', ()=> fileInput.click());
-  chooseBtn.addEventListener('click', ()=> fileInput.click());
-  dz.querySelector('.dz-browse').addEventListener('click', (e)=>{ e.stopPropagation(); fileInput.click(); });
-  fileInput.addEventListener('change', e => setPreview(e.target.files[0]));
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--accent)'; });
-  dz.addEventListener('dragleave', ()=> dz.style.borderColor='var(--input-border)');
-  dz.addEventListener('drop', e => {
+  dz?.addEventListener('click', ()=> fileInput.click());
+  chooseBtn?.addEventListener('click', ()=> fileInput.click());
+  dz?.querySelector('.dz-browse')?.addEventListener('click', (e)=>{ e.stopPropagation(); fileInput.click(); });
+  fileInput?.addEventListener('change', e => setPreview(e.target.files[0]));
+  dz?.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--accent)'; });
+  dz?.addEventListener('dragleave', ()=> dz.style.borderColor='var(--input-border)');
+  dz?.addEventListener('drop', e => {
     e.preventDefault(); dz.style.borderColor='var(--input-border)';
     const f = e.dataTransfer.files[0]; if(!f) return;
     const dt = new DataTransfer(); dt.items.add(f); fileInput.files = dt.files;
@@ -488,15 +581,14 @@ small.helper{color:var(--text-muted);margin-top:.25rem}
 
   removeBtn?.addEventListener('click', ()=>{
     if(!confirm('Supprimer votre avatar ?')) return;
-    fileInput.value = '';
-    preview.src=''; preview.style.display='none';
+    if (fileInput) fileInput.value = '';
+    if (preview){ preview.src=''; preview.style.display='none'; }
     removeField.value='1';
     toast('Avatar marqué pour suppression.', 'ok');
   });
 
   <?php if (!empty($userData['avatar_url'])): ?>
-    preview.src = "<?= htmlspecialchars($userData['avatar_url']) ?>";
-    preview.style.display = 'block';
+    (function(){ const p = document.getElementById('avatarPreview'); if(p){ p.src = "<?= htmlspecialchars($userData['avatar_url']) ?>"; p.style.display='block'; }})();
   <?php endif; ?>
 
   // ---------- Toasts ----------
@@ -518,10 +610,10 @@ small.helper{color:var(--text-muted);margin-top:.25rem}
   const form   = document.getElementById('profileForm');
   const saveBtn= document.getElementById('saveBtn');
   const loader = document.getElementById('loader');
-  form.addEventListener('submit', ()=>{
-    saveBtn.setAttribute('disabled','disabled');
-    saveBtn.textContent = 'Enregistrement...';
-    loader.style.display = 'flex';
+  form?.addEventListener('submit', ()=>{
+    saveBtn?.setAttribute('disabled','disabled');
+    if (saveBtn) saveBtn.textContent = 'Enregistrement...';
+    if (loader) loader.style.display = 'flex';
   });
 })();
 </script>
