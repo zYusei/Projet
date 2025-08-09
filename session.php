@@ -63,6 +63,16 @@ function require_login(): void {
     }
 }
 
+function require_verified() {
+  $u = current_user();
+  if (!$u) { header('Location: connexion.php'); exit; }
+  if (empty($u['email_verified_at'])) {
+    header('Location: verif-required.php'); // page qui explique et propose renvoi de mail
+    exit;
+  }
+}
+
+
 /** Déconnexion propre */
 function logout(): void {
     $_SESSION = [];
@@ -72,3 +82,4 @@ function logout(): void {
     }
     session_destroy();
 }
+

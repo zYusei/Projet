@@ -2,6 +2,10 @@
 // Affiche le formulaire d'inscription
 require_once __DIR__.'/session.php';
 $base  = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+
+// Messages éventuels après redirection depuis register.php
+$sent   = isset($_GET['sent']) && $_GET['sent'] === '1';
+$error  = isset($_GET['error']) ? trim($_GET['error']) : '';
 ?>
 <!DOCTYPE html>
 <html lang="fr" data-theme="light">
@@ -18,6 +22,7 @@ $base  = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
       --surface:#ffffff; --surface-2:#ffffff; --input-border:#e0e4ea;
       --navbar:#ffffff; --navbar-shadow:0 2px 8px rgba(0,0,0,.08);
       --danger:#dc3545; --warn:#ffc107; --ok:#28a745;
+      --info:#0ea5e9; --info-bg:#e0f2fe;
     }
     html[data-theme="dark"]{
       --accent:#5aa1ff; --accent-2:#ffb02e; --accent-3:#ffd54d;
@@ -26,6 +31,7 @@ $base  = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
       --surface:#121826; --surface-2:#162032; --input-border:#2b364b;
       --navbar:#0f1624; --navbar-shadow:0 2px 8px rgba(0,0,0,.5);
       --danger:#ff6b6b; --warn:#ffd166; --ok:#5bd49f;
+      --info:#38bdf8; --info-bg:#073042;
     }
     *{ box-sizing:border-box; margin:0; padding:0; font-family:'Plus Jakarta Sans',sans-serif; }
     body{ min-height:100vh; background:linear-gradient(135deg,var(--bg-grad-1),var(--bg-grad-2)); color:var(--text); display:flex; flex-direction:column; align-items:center; }
@@ -46,16 +52,17 @@ $base  = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
     .login-container{ background:var(--surface); color:var(--text); border-radius:20px; box-shadow:0 20px 30px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.05);
       width:100%; max-width:420px; padding:3rem 3.5rem; margin-top:8rem; animation:fadeInScale .7s ease forwards; }
     @keyframes fadeInScale{ 0%{opacity:0;transform:scale(.96);} 100%{opacity:1;transform:scale(1);} }
-    .login-header{ text-align:center; margin-bottom:2.2rem; }
+    .login-header{ text-align:center; margin-bottom:1.2rem; }
     .login-header svg{ width:50px; height:50px; margin-bottom:.5rem; fill:var(--accent-2); filter:drop-shadow(0 0 2px rgba(0,0,0,.1)); }
     .login-header h1{
-    font-weight:800;
-    font-size:2rem;
-    letter-spacing:1px;
-    background:linear-gradient(90deg,var(--accent),var(--accent-2));
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-  }
+      font-weight:800;font-size:2rem;letter-spacing:1px;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .alert{border:1.5px solid; padding:.75rem .9rem; border-radius:12px; font-weight:700; margin:.8rem 0 1.2rem;}
+    .alert.info{ border-color:color-mix(in srgb, var(--info) 60%, #0000); background:var(--info-bg); color:var(--info); }
+    .alert.ok{ border-color:color-mix(in srgb, var(--ok) 60%, #0000); background:color-mix(in srgb, var(--ok) 18%, transparent); color:var(--ok); }
+    .alert.err{ border-color:color-mix(in srgb, var(--danger) 60%, #0000); background:color-mix(in srgb, var(--danger) 14%, transparent); color:var(--danger); }
     form{ display:flex; flex-direction:column; gap:1.2rem; }
     label{ font-weight:700; font-size:.95rem; margin-bottom:.35rem; color:var(--text); display:block; }
     .input-wrapper{ position:relative; width:100%; }
@@ -104,6 +111,14 @@ $base  = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4L12 60h40L32 4z"/></svg>
     <h1>Inscription</h1>
   </header>
+
+  <?php if ($sent): ?>
+    <div class="alert ok">Inscription enregistrée. Un e-mail de vérification vient d’être envoyé. Pense à vérifier tes spams.</div>
+  <?php elseif ($error): ?>
+    <div class="alert err"><?= htmlspecialchars($error) ?></div>
+  <?php else: ?>
+    <div class="alert info">Remplis ce formulaire. Après validation, tu recevras un lien pour <strong>confirmer ton e-mail</strong>.</div>
+  <?php endif; ?>
 
   <form id="registerForm" method="POST" action="<?= htmlspecialchars($base) ?>/register.php" autocomplete="off" novalidate>
     <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">

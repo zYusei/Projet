@@ -6,23 +6,57 @@ $user = current_user();
 // ----- Démo : catalogue des parcours (tu peux ajuster/ajouter) -----
 $catalog = [
   'programmation' => [
-    ['id'=>'prog_js_basics','title'=>'JS Basics','diff'=>'easy','icon'=>'🟨','desc'=>'Variables, fonctions, DOM'],
-    ['id'=>'prog_python_intro','title'=>'Python Intro','diff'=>'easy','icon'=>'🐍','desc'=>'Bases, listes, boucles'],
-    ['id'=>'prog_sql_101','title'=>'SQL 101','diff'=>'intermediate','icon'=>'🗄️','desc'=>'SELECT, JOIN, GROUP BY'],
-    ['id'=>'prog_algo_ds','title'=>'Algo & Data Structures','diff'=>'intermediate','icon'=>'🧮','desc'=>'Stacks, queues, trees'],
-    ['id'=>'prog_perf_secure','title'=>'Perf & Secure Code','diff'=>'hard','icon'=>'🛡️','desc'=>'Optimisation & sécurité'],
+    // HTML (Facile)
+    ['id'=>'prog_html_intro','title'=>'HTML — Structure','diff'=>'easy','icon'=>'📄','desc'=>'Balises, titres, paragraphes'],
+    ['id'=>'prog_html_links_forms','title'=>'HTML — Liens & formulaires','diff'=>'easy','icon'=>'🔗','desc'=>'Liens, images, inputs de base'],
+
+    // JavaScript (Facile → Intermédiaire)
+    ['id'=>'prog_js_fundamentals','title'=>'JavaScript — Bases','diff'=>'easy','icon'=>'🟨','desc'=>'Variables, types, opérateurs'],
+    ['id'=>'prog_js_dom_events','title'=>'JavaScript — DOM & événements','diff'=>'intermediate','icon'=>'🧩','desc'=>'Sélectionner, écouter, manipuler'],
+
+    // PHP (Facile → Intermédiaire)
+    ['id'=>'prog_php_intro','title'=>'PHP — Syntaxe & variables','diff'=>'easy','icon'=>'🐘','desc'=>'echo, variables, tableaux'],
+    ['id'=>'prog_php_forms','title'=>'PHP — Formulaires & $_POST','diff'=>'intermediate','icon'=>'📮','desc'=>'Validation et traitement sécurisé'],
+
+    // Python (Facile → Intermédiaire → Difficile)
+    ['id'=>'prog_python_intro','title'=>'Python — Premiers pas','diff'=>'easy','icon'=>'🐍','desc'=>'Print, variables, types simples'],
+    ['id'=>'prog_python_data','title'=>'Python — Listes & boucles','diff'=>'intermediate','icon'=>'📚','desc'=>'for, while, compréhensions'],
+    ['id'=>'prog_python_advanced','title'=>'Python — Avancé','diff'=>'hard','icon'=>'🧠','desc'=>'Décorateurs, générateurs, gestion mémoire'],
+
+    // C++ (Intermédiaire → Difficile)
+    ['id'=>'prog_cpp_intro','title'=>'C++ — Bases','diff'=>'intermediate','icon'=>'💠','desc'=>'Types, iostream, boucles'],
+    ['id'=>'prog_cpp_oop','title'=>'C++ — Programmation objet','diff'=>'hard','icon'=>'🏗️','desc'=>'Classes, héritage, polymorphisme'],
   ],
+
+  // ===== Colonne du milieu -> Débutant : sécurité au quotidien (inchangée) =====
   'pentest' => [
-    ['id'=>'pt_web_fund','title'=>'Web Fundamentals','diff'=>'easy','icon'=>'🌐','desc'=>'HTTP, cookies, sessions'],
-    ['id'=>'pt_jr','title'=>'Jr. Penetration Tester','diff'=>'intermediate','icon'=>'🕵️','desc'=>'Recon, scanning, vuln'],
-    ['id'=>'pt_web_app','title'=>'Web App Pentesting','diff'=>'intermediate','icon'=>'🕸️','desc'=>'XSS, SQLi, IDOR'],
-    ['id'=>'pt_red','title'=>'Red Teaming','diff'=>'hard','icon'=>'🗡️','desc'=>'Adversary emulation'],
+    ['id'=>'b_sec_phishing_simple','title'=>'Le phishing (tout simple)','diff'=>'easy','icon'=>'🎣','desc'=>'Reconnaître un faux mail en 3 indices'],
+    ['id'=>'b_fake_sites','title'=>'Vrai site ou faux ?','diff'=>'easy','icon'=>'🔍','desc'=>'URL, certificat, signaux visuels'],
+    ['id'=>'b_passwords','title'=>'Mots de passe & manager','diff'=>'easy','icon'=>'🔐','desc'=>'Passphrase, coffre-fort, règles'],
+    ['id'=>'b_2fa','title'=>'Activer 2FA partout','diff'=>'easy','icon'=>'🛡️','desc'=>'App d’authentification, codes de secours'],
+    ['id'=>'b_updates','title'=>'Mises à jour & correctifs','diff'=>'easy','icon'=>'⬆️','desc'=>'OS, navigateur, extensions'],
+    ['id'=>'b_downloads','title'=>'Pièces jointes & téléchargements','diff'=>'easy','icon'=>'📥','desc'=>'Vérifier avant d’ouvrir'],
+    ['id'=>'b_wifi','title'=>'Wi-Fi public en sécurité','diff'=>'intermediate','icon'=>'📶','desc'=>'Partage, VPN, HTTPS'],
+    ['id'=>'b_privacy','title'=>'Confidentialité & permissions','diff'=>'easy','icon'=>'🔎','desc'=>'Cookies, applis, traqueurs'],
   ],
+
+  // ===== Cybersécurité : homogénéisée (10 items, crescendo) =====
   'cyber' => [
+    // Facile
     ['id'=>'sec_basics','title'=>'Security Engineer','diff'=>'easy','icon'=>'🏗️','desc'=>'Principes & bonnes pratiques'],
+    ['id'=>'sec_password_hygiene','title'=>'Hygiène des mots de passe','diff'=>'easy','icon'=>'🔐','desc'=>'Politiques, stockage, MFA'],
+    ['id'=>'sec_network_basics','title'=>'Réseau sécurisé','diff'=>'easy','icon'=>'🌐','desc'=>'HTTPS, VPN, segmentation'],
+    ['id'=>'sec_phishing_defense','title'=>'Défense anti-phishing','diff'=>'easy','icon'=>'🎣','desc'=>'Filtrage, formation, réponses'],
+
+    // Intermédiaire
     ['id'=>'sec_devsecops','title'=>'DevSecOps','diff'=>'intermediate','icon'=>'∞','desc'=>'CI/CD, SAST/DAST, secrets'],
     ['id'=>'sec_cloud_aws','title'=>'Attacking & Defending AWS','diff'=>'intermediate','icon'=>'☁️','desc'=>'IAM, S3, attack paths'],
+    ['id'=>'sec_threat_hunting','title'=>'Threat Hunting','diff'=>'intermediate','icon'=>'🕵️‍♂️','desc'=>'Hypothèses, IoC, télémétrie'],
+    ['id'=>'sec_vuln_mgmt','title'=>'Gestion des vulnérabilités','diff'=>'intermediate','icon'=>'🧩','desc'=>'Scan, priorisation, patching'],
+
+    // Difficile
     ['id'=>'sec_aei','title'=>'Endpoint Investigations','diff'=>'hard','icon'=>'🧊','desc'=>'DFIR, artefacts, timeline'],
+    ['id'=>'sec_red_team','title'=>'Red Team Operations','diff'=>'hard','icon'=>'🎯','desc'=>'Intrusion, persistence, évasion'],
   ],
 ];
 
@@ -121,7 +155,6 @@ function path_progress($id, $progress) {
       background:linear-gradient(90deg,var(--accent),var(--accent-2));
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
     }
-    /* Dégradé un peu plus sombre + ombre subtile en mode clair */
     html[data-theme="light"] .hero h1{
       background:linear-gradient(90deg,#0a47ff,#005de6);
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
@@ -139,12 +172,12 @@ function path_progress($id, $progress) {
     .path{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.9rem;display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center;margin-bottom:.8rem}
     .ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surface-2)}
     .path h3{font-size:1rem;margin-bottom:.15rem}
-    .path p{font-size:.9rem;color:var(--text-muted); margin-bottom:.10rem;} /* espace sous la description */
+    .path p{font-size:.9rem;color:var(--text-muted); margin-bottom:.10rem;}
 
     .diff{
       font-weight:800;font-size:.8rem;border-radius:999px;padding:.2rem .5rem;
       display:inline-flex;align-items:center;gap:.35rem;
-      margin-top:.35rem; /* ↓ badges un peu plus bas */
+      margin-top:.35rem;
     }
     .diff.easy{background:color-mix(in srgb, var(--easy) 18%, transparent); color:var(--easy); border:1px solid color-mix(in srgb, var(--easy) 45%, transparent);}
     .diff.inter{background:color-mix(in srgb, var(--inter) 18%, transparent); color:var(--inter); border:1px solid color-mix(in srgb, var(--inter) 45%, transparent);}
@@ -272,9 +305,9 @@ function path_progress($id, $progress) {
       </div>
     </section>
 
-    <!-- Pentest -->
+    <!-- Débutant : sécurité au quotidien -->
     <section class="col">
-      <div class="col-head"><h2>Pentest</h2><span class="diff inter">Facile → Difficile</span></div>
+      <div class="col-head"><h2>Débutant</h2><span class="diff easy">Essentiels</span></div>
       <div class="col-body">
         <?php foreach ($catalog['pentest'] as $p): $pct = path_progress($p['id'],$progress); $gid='grad_'.preg_replace('/[^a-z0-9_]+/i','_',$p['id']); ?>
           <article class="path" data-id="<?= htmlspecialchars($p['id']) ?>">
