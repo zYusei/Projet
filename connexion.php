@@ -163,7 +163,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
     .login-header{ text-align:center; margin-bottom:2.2rem; }
     .login-header svg{ width:50px; height:50px; margin-bottom:.5rem; fill:var(--accent-2); filter:drop-shadow(0 0 2px rgba(0,0,0,.1)); }
-    .login-header h1{ font-weight:800; font-size:2rem; color:var(--accent); letter-spacing:1px; }
+    /* Dans ton <style>, remplace juste la partie .login-header h1 par : */
+    .login-header h1 {
+    font-weight:800;
+    font-size:2rem;
+    letter-spacing:1px;
+     background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+} 
 
     form{ display:flex; flex-direction:column; gap:1.2rem; }
     label{ font-weight:700; font-size:.95rem; margin-bottom:.35rem; color:var(--text); display:block; }
