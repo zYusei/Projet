@@ -23,11 +23,19 @@ $base = $protocol . "://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_
 // Sommes-nous sur la page profil ? (pour masquer "Mon profil" dans le menu)
 $onProfile = basename($_SERVER['PHP_SELF']) === 'profil.php';
 
-// Récupère les infos actuelles
-$stmt = $db->prepare("SELECT id, username, email, created_at, avatar_url FROM users WHERE id = :id LIMIT 1");
+// Récupère les infos actuelles (inclut email_verified_at)
+$stmt = $db->prepare("
+  SELECT id, username, email, created_at, avatar_url, email_verified_at
+  FROM users
+  WHERE id = :id
+  LIMIT 1
+");
 $stmt->execute([':id' => $user['id']]);
 $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$userData) die("Utilisateur introuvable.");
+
+// Flag vérification email
+$isVerified = !empty($userData['email_verified_at']);
 
 // --------- Progression depuis la BDD ---------
 $stats = get_user_stats($db, (int)$userData['id']);
@@ -173,7 +181,6 @@ body{min-height:100vh;color:var(--text);background:linear-gradient(135deg,var(--
   background:var(--navbar);
   box-shadow:var(--navbar-shadow);
   position:sticky;top:0;z-index:50;
-  /* espace sous la navbar pour décoller le menu */
   margin-bottom:10px;
 }
 .nav-content{max-width:1100px;margin:auto;padding:.8rem 1rem;display:flex;align-items:center;gap:.75rem;}
@@ -200,7 +207,7 @@ html[data-theme="dark"] .theme-knob{left:18px}
 .user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800}
 .user-name{font-weight:800;font-size:.95rem;color:var(--text)}
 .dropdown{
-  position:absolute;right:0;top:calc(100% + 12px); /* décollé un peu plus */
+  position:absolute;right:0;top:calc(100% + 12px);
   min-width:190px;background:var(--surface);border:1px solid var(--glass-border);
   border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.25);padding:.4rem;display:none
 }
@@ -245,8 +252,13 @@ html[data-theme="dark"] .theme-knob{left:18px}
 .hero{display:flex;align-items:center;gap:16px;margin-bottom:1rem;}
 .avatar{width:84px;height:84px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;flex-shrink:0;box-shadow:0 8px 18px rgba(0,0,0,.25);object-fit:cover;}
 .username{font-size:1.55rem;font-weight:800;color:var(--text);}
-.badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--chip-bg);color:var(--chip-text);border-radius:999px;padding:.35rem .7rem;font-size:.85rem;font-weight:700;}
 .meta{color:var(--text-muted);margin-top:.35rem}
+
+/* Icône vérifié (style Instagram) */
+.verified-icon{
+  width:20px;height:20px;display:inline-block;vertical-align:middle;
+  filter: drop-shadow(0 0 1px rgba(0,0,0,.3));
+}
 
 /* ---- Progress ring ---- */
 .progress{
@@ -397,7 +409,23 @@ small.helper{color:var(--text-muted);margin-top:.25rem}
           <div class="avatar"><?= strtoupper(substr($userData['username'],0,1)) ?></div>
         <?php endif; ?>
         <div>
-          <div class="username"><?= htmlspecialchars($userData['username']) ?></div>
+          <!-- Pseudo + pastille vérifiée -->
+<div style="display:flex; align-items:center; gap:6px;">
+  <div class="username"><?= htmlspecialchars($userData['username']) ?></div>
+  <?php if ($isVerified): ?>
+    <svg class="verified-icon"
+         xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 24 24"
+         width="20" height="20"
+         role="img" aria-label="Compte vérifié">
+      <title>Vérifié</title>
+      <circle cx="12" cy="12" r="12" fill="#3897f0"/>
+      <path d="M10 15l-3-3 1.4-1.4L10 12.2l5.6-5.6L17 8l-7 7z" fill="#fff"/>
+    </svg>
+  <?php endif; ?>
+</div>
+
+
           <div class="meta"><?= htmlspecialchars($userData['email']) ?></div>
           <div class="meta">Inscrit le <?= htmlspecialchars(date("d/m/Y", strtotime($userData['created_at']))) ?></div>
         </div>
@@ -424,7 +452,7 @@ small.helper{color:var(--text-muted);margin-top:.25rem}
 
       <div class="chip-center"><span class="badge">Badges</span></div>
 
-      <?php if ($userBadges): ?>
+      <?php if (!empty($userBadges)): ?>
         <div class="badge-grid-user">
           <?php foreach ($userBadges as $b): ?>
             <div class="ubadge" title="<?= htmlspecialchars($b['name']) ?>">

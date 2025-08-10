@@ -1,9 +1,9 @@
 <?php
-// verify.php — confirmation d'e-mail avec rendu soigné
+// verify.php — confirmation d'e-mail avec rendu modernisé
 require_once __DIR__.'/db.php';
 require_once __DIR__.'/session.php';
 
-$status = 'success'; // success | error | expired | invalid
+$status = 'success';
 $title  = 'Adresse vérifiée 🎉';
 $message= 'Ton adresse email a bien été confirmée. Tu peux maintenant te connecter.';
 $ctaPrimaryHref = 'connexion.php';
@@ -11,7 +11,6 @@ $ctaPrimaryText = 'Se connecter';
 $ctaSecondaryHref = 'inscription.php';
 $ctaSecondaryText = 'Retour à l’inscription';
 
-// ——— Vérifications serveur (identiques à ta logique) ———
 try {
   $userId = isset($_GET['u']) ? (int)$_GET['u'] : 0;
   $token  = $_GET['t'] ?? '';
@@ -40,7 +39,6 @@ try {
       $ctaSecondaryHref = 'connexion.php';
       $ctaSecondaryText = 'Se connecter';
     } elseif (!empty($user['email_verified_at'])) {
-      http_response_code(200);
       $status='success';
       $title='Adresse déjà vérifiée';
       $message='Ton adresse e-mail était déjà confirmée. Tu peux directement te connecter.';
@@ -71,7 +69,6 @@ try {
         $ctaSecondaryHref = 'connexion.php';
         $ctaSecondaryText = 'Se connecter';
       } else {
-        // OK : on valide
         $pdo->beginTransaction();
         $upd = $pdo->prepare("UPDATE users
           SET email_verified_at = NOW(), verify_token_hash = NULL, verify_token_expires = NULL
@@ -79,7 +76,6 @@ try {
         $upd->execute([':id'=>$userId]);
         $pdo->commit();
 
-        http_response_code(200);
         $status='success';
         $title='Adresse vérifiée 🎉';
         $message='Merci ! Ton adresse email a bien été confirmée. Tu peux maintenant te connecter et profiter de FunCodeLab.';
@@ -103,145 +99,98 @@ try {
   $ctaSecondaryText = 'Créer un compte';
 }
 
-// Auto-redirect doux après succès (4s)
 $autoRedirect = ($status === 'success') ? $ctaPrimaryHref : '';
 ?>
 <!DOCTYPE html>
-<html lang="fr" data-theme="light">
+<html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <meta name="robots" content="noindex,nofollow">
-  <title>Vérification d’e-mail • FunCodeLab</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --accent:#007BFF; --accent-2:#FFA500; --accent-3:#63E6BE;
-      --text:#0b1220; --muted:#5b667a;
-      --bg1:#2185ff; --bg2:#ffb347;
-      --surface:#ffffff; --surface-2:#f6f8fc; --border:#e6ebf3;
-      --ok:#16a34a; --warn:#f59e0b; --err:#ef4444; --info:#0ea5e9;
-      --shadow: 0 30px 60px rgba(0,0,0,.15), 0 0 0 1px rgba(0,0,0,.04);
-    }
-    html[data-theme="dark"]{
-      --accent:#5aa1ff; --accent-2:#ffb02e; --accent-3:#4ade80;
-      --text:#eef2f7; --muted:#9aa5b5;
-      --bg1:#0f172a; --bg2:#1f2937;
-      --surface:#0f1624; --surface-2:#131c2c; --border:#243247;
-      --ok:#22c55e; --warn:#fbbf24; --err:#f87171; --info:#38bdf8;
-      --shadow: 0 40px 90px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      min-height:100vh;
-      background:linear-gradient(135deg,var(--bg1),var(--bg2));
-      color:var(--text);
-      font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      display:grid; place-items:center; padding:2rem 1rem;
-    }
-    .shell{max-width:780px;width:100%}
-    .card{
-      background:var(--surface); border:1px solid var(--border); border-radius:24px;
-      box-shadow:var(--shadow); overflow:hidden;
-      display:grid; grid-template-columns:1fr; 
-    }
-    .head{
-      padding:1.6rem 1.8rem; background:linear-gradient(90deg, color-mix(in srgb, var(--surface) 75%, transparent), transparent);
-      border-bottom:1px solid var(--border); display:flex; align-items:center; gap:1rem;
-    }
-    .badge{
-      font-weight:800; font-size:.85rem; padding:.25rem .6rem; border-radius:999px; border:1px solid;
-      display:inline-flex; align-items:center; gap:.45rem;
-    }
-    .badge.ok{ color:var(--ok); border-color:color-mix(in srgb, var(--ok) 60%, transparent); background:color-mix(in srgb, var(--ok) 12%, transparent); }
-    .badge.err{ color:var(--err); border-color:color-mix(in srgb, var(--err) 60%, transparent); background:color-mix(in srgb, var(--err) 12%, transparent); }
-    .badge.warn{ color:var(--warn); border-color:color-mix(in srgb, var(--warn) 60%, transparent); background:color-mix(in srgb, var(--warn) 12%, transparent); }
-    .badge.info{ color:var(--info); border-color:color-mix(in srgb, var(--info) 60%, transparent); background:color-mix(in srgb, var(--info) 12%, transparent); }
-    h1{ font-size:clamp(1.6rem, 1.1rem + 1.4vw, 2.2rem); font-weight:800; letter-spacing:.2px; }
-    .body{ padding:2rem 1.8rem 2.2rem; display:grid; gap:1rem; }
-    .msg{ color:var(--muted); font-size:1.05rem; line-height:1.6; }
-    .cta{ display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.2rem; }
-    .btn{
-      appearance:none; border:none; cursor:pointer; text-decoration:none; font-weight:800;
-      padding:.85rem 1rem; border-radius:12px; display:inline-flex; align-items:center; gap:.5rem;
-      transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .btn:active{ transform:translateY(1px); }
-    .btn.primary{ background:var(--accent); color:#fff; box-shadow:0 10px 18px rgba(0,0,0,.15); }
-    .btn.primary:hover{ background:color-mix(in srgb, var(--accent) 85%, #0000); }
-    .btn.secondary{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
-    .meta{font-size:.86rem; color:var(--muted)}
-    .status-icon{
-      width:44px;height:44px; border-radius:12px; display:grid;place-items:center;
-      background:var(--surface-2); border:1px solid var(--border); flex:0 0 auto;
-      font-size:22px;
-    }
-    .confetti{ position:fixed; inset:0; pointer-events:none; opacity:.4; }
-  </style>
-  <?php if ($autoRedirect): ?>
-  <script>
-    // redirection douce après succès
-    setTimeout(()=>{ location.href = <?= json_encode($autoRedirect) ?>; }, 4000);
-  </script>
-  <?php endif; ?>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vérification d’e-mail • FunCodeLab</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#007BFF; --accent-2:#FFA500; --accent-3:#63E6BE;
+  --ok:#16a34a; --warn:#f59e0b; --err:#ef4444; --info:#0ea5e9;
+  --text:#0b1220; --muted:#5b667a; --surface:#fff; --surface-2:#f6f8fc; --border:#e6ebf3;
+}
+body{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  font-family:'Plus Jakarta Sans',sans-serif;
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh; padding:1rem; color:var(--text);
+}
+.card{
+  background:var(--surface);border-radius:24px;padding:2rem;
+  box-shadow:0 25px 60px rgba(0,0,0,.15);
+  max-width:600px;width:100%;animation:fadeInUp .6s ease forwards;
+}
+.status-icon{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;justify-content:center;align-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:white;font-size:28px;animation:rotateGradient 3s linear infinite;
+  margin-bottom:1rem;
+}
+h1{
+  font-size:1.8rem;font-weight:800;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+p.msg{margin-top:1rem;color:var(--muted);font-size:1.05rem;line-height:1.6;}
+.badge{
+  padding:.4rem .8rem;border-radius:12px;display:inline-block;margin-bottom:.5rem;
+  backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);
+}
+.badge.ok{color:var(--ok);background:rgba(22,163,74,0.1);}
+.badge.err{color:var(--err);background:rgba(239,68,68,0.1);}
+.badge.warn{color:var(--warn);background:rgba(245,158,11,0.1);}
+.badge.info{color:var(--info);background:rgba(14,165,233,0.1);}
+.cta{margin-top:1.5rem;display:flex;gap:.8rem;flex-wrap:wrap;}
+.btn{
+  padding:.8rem 1.2rem;border-radius:12px;font-weight:800;text-decoration:none;
+  display:inline-flex;align-items:center;gap:.4rem;transition:.2s ease;
+}
+.btn.primary{background:var(--accent);color:white;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.btn.primary:hover{box-shadow:0 6px 16px rgba(0,0,0,0.25);transform:translateY(-1px);}
+.btn.secondary{background:var(--surface-2);color:var(--text);}
+.btn.secondary:hover{background:var(--border);}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes rotateGradient{0%{filter:hue-rotate(0);}100%{filter:hue-rotate(360deg);}}
+.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;}
+.confetti span{
+  position:absolute;width:8px;height:8px;background:var(--accent);
+  animation:fall 3s linear infinite;
+}
+@keyframes fall{0%{transform:translateY(-10vh) rotate(0);}100%{transform:translateY(100vh) rotate(360deg);}}
+</style>
+<?php if ($autoRedirect): ?>
+<script>setTimeout(()=>{location.href=<?= json_encode($autoRedirect) ?>},4000);</script>
+<?php endif; ?>
 </head>
 <body>
-  <div class="shell">
-    <div class="card">
-      <div class="head">
-        <div class="status-icon">
-          <?php
-            // icône selon l'état
-            if ($status==='success')       echo '✅';
-            elseif ($status==='expired')   echo '⏳';
-            elseif ($status==='invalid')   echo '⚠️';
-            else                           echo '❌';
-          ?>
-        </div>
-        <div>
-          <div class="badge <?= $status==='success'?'ok':($status==='expired'?'warn':($status==='invalid'?'info':'err')) ?>">
-            <?php
-              echo $status==='success'?'Succès':
-                   ($status==='expired'?'Lien expiré':
-                   ($status==='invalid'?'Information':'Erreur'));
-            ?>
-          </div>
-          <h1><?= htmlspecialchars($title) ?></h1>
-        </div>
-      </div>
-
-      <div class="body">
-        <p class="msg"><?= htmlspecialchars($message) ?></p>
-
-        <div class="cta">
-          <a class="btn primary" href="<?= htmlspecialchars($ctaPrimaryHref) ?>">👉 <?= htmlspecialchars($ctaPrimaryText) ?></a>
-          <a class="btn secondary" href="<?= htmlspecialchars($ctaSecondaryHref) ?>"><?= htmlspecialchars($ctaSecondaryText) ?></a>
-        </div>
-
-        <?php if ($status==='success'): ?>
-          <p class="meta">Redirection automatique dans quelques secondes…</p>
-        <?php elseif ($status==='expired' || $status==='invalid'): ?>
-          <p class="meta">Besoin d’aide ? Contacte le support ou renvoie-toi un nouveau lien de vérification.</p>
-        <?php endif; ?>
-      </div>
-    </div>
+<div class="card">
+  <div class="status-icon">
+    <?= $status==='success'?'✅':($status==='expired'?'⏳':($status==='invalid'?'⚠️':'❌')) ?>
   </div>
+  <div class="badge <?= $status==='success'?'ok':($status==='expired'?'warn':($status==='invalid'?'info':'err')) ?>">
+    <?= $status==='success'?'Succès':($status==='expired'?'Lien expiré':($status==='invalid'?'Information':'Erreur')) ?>
+  </div>
+  <h1><?= htmlspecialchars($title) ?></h1>
+  <p class="msg"><?= htmlspecialchars($message) ?></p>
+  <div class="cta">
+    <a href="<?= htmlspecialchars($ctaPrimaryHref) ?>" class="btn primary">👉 <?= htmlspecialchars($ctaPrimaryText) ?></a>
+    <a href="<?= htmlspecialchars($ctaSecondaryHref) ?>" class="btn secondary"><?= htmlspecialchars($ctaSecondaryText) ?></a>
+  </div>
+  <?php if ($status==='success'): ?><p class="meta">Redirection dans quelques secondes...</p><?php endif; ?>
+</div>
 
-  <?php if ($status==='success'): ?>
-  <!-- petit confetti SVG discret -->
-  <svg class="confetti" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent-3)"/>
-      </linearGradient>
-    </defs>
-    <g fill="url(#g)" opacity=".35">
-      <?php for($i=0;$i<36;$i++): $x=rand(0,100); $y=rand(0,100); $r=rand(1,3); ?>
-        <circle cx="<?= $x ?>" cy="<?= $y ?>" r="<?= $r ?>"></circle>
-      <?php endfor; ?>
-    </g>
-  </svg>
-  <?php endif; ?>
+<?php if ($status==='success'): ?>
+<div class="confetti">
+  <?php for($i=0;$i<40;$i++): ?>
+    <span style="left:<?= rand(0,100) ?>%;animation-delay:<?= rand(0,300)/100 ?>s;background:hsl(<?= rand(0,360) ?>,70%,60%);"></span>
+  <?php endfor; ?>
+</div>
+<?php endif; ?>
 </body>
 </html>

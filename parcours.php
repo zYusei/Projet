@@ -169,7 +169,10 @@ function path_progress($id, $progress) {
     .col-head h2{font-size:1.1rem;font-weight:800}
     .col-body{padding:1rem}
 
-    .path{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.9rem;display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center;margin-bottom:.8rem}
+    /* lien qui entoure la carte */
+    .path-link{display:block; text-decoration:none; color:inherit;}
+    .path{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.9rem;display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center;margin-bottom:.8rem; transition: transform .15s ease, box-shadow .15s ease;}
+    .path:hover{ transform: scale(1.02); box-shadow:0 10px 20px rgba(0,0,0,.08); }
     .ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surface-2)}
     .path h3{font-size:1rem;margin-bottom:.15rem}
     .path p{font-size:.9rem;color:var(--text-muted); margin-bottom:.10rem;}
@@ -275,32 +278,34 @@ function path_progress($id, $progress) {
     <section class="col">
       <div class="col-head"><h2>Programmation</h2><span class="diff easy">Facile → Difficile</span></div>
       <div class="col-body">
-        <?php foreach ($catalog['programmation'] as $p): $pct = path_progress($p['id'],$progress); $gid='grad_'.preg_replace('/[^a-z0-9_]+/i','_',$p['id']); ?>
-          <article class="path" data-id="<?= htmlspecialchars($p['id']) ?>">
-            <div class="ico"><?= $p['icon'] ?></div>
-            <div>
-              <h3><?= htmlspecialchars($p['title']) ?></h3>
-              <p><?= htmlspecialchars($p['desc']) ?></p>
-              <span class="diff <?= $p['diff']==='hard'?'hard':($p['diff']==='intermediate'?'inter':($p['diff']==='inter'?'inter':'easy')) ?>">
-                <?= $p['diff']==='hard'?'Difficile':($p['diff']==='intermediate'?'Intermédiaire':($p['diff']==='inter'?'Intermédiaire':'Facile')) ?>
-              </span>
-            </div>
-            <div class="progress" aria-label="Progression <?= $pct ?>%">
-              <div class="cprog" style="--pct: <?= $pct ?>; --arc-url: url(#<?= $gid ?>);">
-                <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
-                  <defs>
-                    <linearGradient id="<?= $gid ?>" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%"   stop-color="#0b75ff"/>
-                      <stop offset="100%" stop-color="#6eb3ff"/>
-                    </linearGradient>
-                  </defs>
-                  <circle class="bg" cx="18" cy="18" r="15.915"></circle>
-                  <circle class="fg" cx="18" cy="18" r="15.915"></circle>
-                </svg>
-                <div class="cprog-label"><?= $pct ?>%</div>
+        <?php foreach ($catalog['programmation'] as $idx => $p): $pct = path_progress($p['id'],$progress); $gid='grad_'.preg_replace('/[^a-z0-9_]+/i','_',$p['id']); $target = 'programmation/'.($idx+1).'.php'; ?>
+          <a class="path-link" href="<?= htmlspecialchars($target) ?>" aria-label="<?= htmlspecialchars($p['title']) ?>">
+            <article class="path" data-id="<?= htmlspecialchars($p['id']) ?>">
+              <div class="ico"><?= $p['icon'] ?></div>
+              <div>
+                <h3><?= htmlspecialchars($p['title']) ?></h3>
+                <p><?= htmlspecialchars($p['desc']) ?></p>
+                <span class="diff <?= $p['diff']==='hard'?'hard':($p['diff']==='intermediate'?'inter':($p['diff']==='inter'?'inter':'easy')) ?>">
+                  <?= $p['diff']==='hard'?'Difficile':($p['diff']==='intermediate'?'Intermédiaire':($p['diff']==='inter'?'Intermédiaire':'Facile')) ?>
+                </span>
               </div>
-            </div>
-          </article>
+              <div class="progress" aria-label="Progression <?= $pct ?>%">
+                <div class="cprog" style="--pct: <?= $pct ?>; --arc-url: url(#<?= $gid ?>);">
+                  <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+                    <defs>
+                      <linearGradient id="<?= $gid ?>" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#0b75ff"/>
+                        <stop offset="100%" stop-color="#6eb3ff"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="bg" cx="18" cy="18" r="15.915"></circle>
+                    <circle class="fg" cx="18" cy="18" r="15.915"></circle>
+                  </svg>
+                  <div class="cprog-label"><?= $pct ?>%</div>
+                </div>
+              </div>
+            </article>
+          </a>
         <?php endforeach; ?>
       </div>
     </section>
@@ -309,32 +314,34 @@ function path_progress($id, $progress) {
     <section class="col">
       <div class="col-head"><h2>Débutant</h2><span class="diff easy">Essentiels</span></div>
       <div class="col-body">
-        <?php foreach ($catalog['pentest'] as $p): $pct = path_progress($p['id'],$progress); $gid='grad_'.preg_replace('/[^a-z0-9_]+/i','_',$p['id']); ?>
-          <article class="path" data-id="<?= htmlspecialchars($p['id']) ?>">
-            <div class="ico"><?= $p['icon'] ?></div>
-            <div>
-              <h3><?= htmlspecialchars($p['title']) ?></h3>
-              <p><?= htmlspecialchars($p['desc']) ?></p>
-              <span class="diff <?= $p['diff']==='hard'?'hard':($p['diff']==='intermediate'?'inter':($p['diff']==='inter'?'inter':'easy')) ?>">
-                <?= $p['diff']==='hard'?'Difficile':($p['diff']==='intermediate'?'Intermédiaire':($p['diff']==='inter'?'Intermédiaire':'Facile')) ?>
-              </span>
-            </div>
-            <div class="progress" aria-label="Progression <?= $pct ?>%">
-              <div class="cprog" style="--pct: <?= $pct ?>; --arc-url: url(#<?= $gid ?>);">
-                <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
-                  <defs>
-                    <linearGradient id="<?= $gid ?>" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%"   stop-color="#0b75ff"/>
-                      <stop offset="100%" stop-color="#6eb3ff"/>
-                    </linearGradient>
-                  </defs>
-                  <circle class="bg" cx="18" cy="18" r="15.915"></circle>
-                  <circle class="fg" cx="18" cy="18" r="15.915"></circle>
-                </svg>
-                <div class="cprog-label"><?= $pct ?>%</div>
+        <?php foreach ($catalog['pentest'] as $idx => $p): $pct = path_progress($p['id'],$progress); $gid='grad_'.preg_replace('/[^a-z0-9_]+/i','_',$p['id']); $target = 'debutant/'.($idx+1).'.php'; ?>
+          <a class="path-link" href="<?= htmlspecialchars($target) ?>" aria-label="<?= htmlspecialchars($p['title']) ?>">
+            <article class="path" data-id="<?= htmlspecialchars($p['id']) ?>">
+              <div class="ico"><?= $p['icon'] ?></div>
+              <div>
+                <h3><?= htmlspecialchars($p['title']) ?></h3>
+                <p><?= htmlspecialchars($p['desc']) ?></p>
+                <span class="diff <?= $p['diff']==='hard'?'hard':($p['diff']==='intermediate'?'inter':($p['diff']==='inter'?'inter':'easy')) ?>">
+                  <?= $p['diff']==='hard'?'Difficile':($p['diff']==='intermediate'?'Intermédiaire':($p['diff']==='inter'?'Intermédiaire':'Facile')) ?>
+                </span>
               </div>
-            </div>
-          </article>
+              <div class="progress" aria-label="Progression <?= $pct ?>%">
+                <div class="cprog" style="--pct: <?= $pct ?>; --arc-url: url(#<?= $gid ?>);">
+                  <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+                    <defs>
+                      <linearGradient id="<?= $gid ?>" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#0b75ff"/>
+                        <stop offset="100%" stop-color="#6eb3ff"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="bg" cx="18" cy="18" r="15.915"></circle>
+                    <circle class="fg" cx="18" cy="18" r="15.915"></circle>
+                  </svg>
+                  <div class="cprog-label"><?= $pct ?>%</div>
+                </div>
+              </div>
+            </article>
+          </a>
         <?php endforeach; ?>
       </div>
     </section>
@@ -343,32 +350,34 @@ function path_progress($id, $progress) {
     <section class="col">
       <div class="col-head"><h2>Cybersécurité</h2><span class="diff hard">Facile → Difficile</span></div>
       <div class="col-body">
-        <?php foreach ($catalog['cyber'] as $p): $pct = path_progress($p['id'],$progress); $gid='grad_'.preg_replace('/[^a-z0-9_]+/i','_',$p['id']); ?>
-          <article class="path" data-id="<?= htmlspecialchars($p['id']) ?>">
-            <div class="ico"><?= $p['icon'] ?></div>
-            <div>
-              <h3><?= htmlspecialchars($p['title']) ?></h3>
-              <p><?= htmlspecialchars($p['desc']) ?></p>
-              <span class="diff <?= $p['diff']==='hard'?'hard':($p['diff']==='intermediate'?'inter':($p['diff']==='inter'?'inter':'easy')) ?>">
-                <?= $p['diff']==='hard'?'Difficile':($p['diff']==='intermediate'?'Intermédiaire':($p['diff']==='inter'?'Intermédiaire':'Facile')) ?>
-              </span>
-            </div>
-            <div class="progress" aria-label="Progression <?= $pct ?>%">
-              <div class="cprog" style="--pct: <?= $pct ?>; --arc-url: url(#<?= $gid ?>);">
-                <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
-                  <defs>
-                    <linearGradient id="<?= $gid ?>" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%"   stop-color="#0b75ff"/>
-                      <stop offset="100%" stop-color="#6eb3ff"/>
-                    </linearGradient>
-                  </defs>
-                  <circle class="bg" cx="18" cy="18" r="15.915"></circle>
-                  <circle class="fg" cx="18" cy="18" r="15.915"></circle>
-                </svg>
-                <div class="cprog-label"><?= $pct ?>%</div>
+        <?php foreach ($catalog['cyber'] as $idx => $p): $pct = path_progress($p['id'],$progress); $gid='grad_'.preg_replace('/[^a-z0-9_]+/i','_',$p['id']); $target = 'cyber/'.($idx+1).'.php'; ?>
+          <a class="path-link" href="<?= htmlspecialchars($target) ?>" aria-label="<?= htmlspecialchars($p['title']) ?>">
+            <article class="path" data-id="<?= htmlspecialchars($p['id']) ?>">
+              <div class="ico"><?= $p['icon'] ?></div>
+              <div>
+                <h3><?= htmlspecialchars($p['title']) ?></h3>
+                <p><?= htmlspecialchars($p['desc']) ?></p>
+                <span class="diff <?= $p['diff']==='hard'?'hard':($p['diff']==='intermediate'?'inter':($p['diff']==='inter'?'inter':'easy')) ?>">
+                  <?= $p['diff']==='hard'?'Difficile':($p['diff']==='intermediate'?'Intermédiaire':($p['diff']==='inter'?'Intermédiaire':'Facile')) ?>
+                </span>
               </div>
-            </div>
-          </article>
+              <div class="progress" aria-label="Progression <?= $pct ?>%">
+                <div class="cprog" style="--pct: <?= $pct ?>; --arc-url: url(#<?= $gid ?>);">
+                  <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+                    <defs>
+                      <linearGradient id="<?= $gid ?>" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#0b75ff"/>
+                        <stop offset="100%" stop-color="#6eb3ff"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="bg" cx="18" cy="18" r="15.915"></circle>
+                    <circle class="fg" cx="18" cy="18" r="15.915"></circle>
+                  </svg>
+                  <div class="cprog-label"><?= $pct ?>%</div>
+                </div>
+              </div>
+            </article>
+          </a>
         <?php endforeach; ?>
       </div>
     </section>
