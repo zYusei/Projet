@@ -230,8 +230,7 @@ function path_progress($id, $progress) {
     <div class="logo">FunCodeLab</div>
     <ul class="nav-links">
       <li><a href="index.php">Accueil</a></li>
-      <li><a href="parcours.php">Parcours</a></li>
-      <li><a href="#">Quiz</a></li>
+      <li><a href="challenge/index.php">Challenges</a></li>
       <li>
         <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Basculer le thème">
           <span id="themeLabel">Clair</span>

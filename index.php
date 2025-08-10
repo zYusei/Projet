@@ -179,7 +179,7 @@ if (!isset($badges)) {
   <div class="nav-content">
     <div class="logo">FunCodeLab</div>
     <ul class="nav-links" id="primaryNav">
-      <li><a href="#">Quiz</a></li>
+      <li><a href="challenge/index.php">Challenge</a></li>
       <li><a href="parcours.php">Parcours</a></li>
 
       <!-- Toggle thème -->
