@@ -40,7 +40,6 @@ render_head('Challenges — FunCodeLab');
 <p class="subhead">Courtes épreuves chronométrées. Gagne des points et grimpe au classement.</p>
 
 <form method="get" class="toolbar">
-  <a href="home.php" class="btn-ghost" style="white-space:nowrap; padding:.6rem 1rem; border-radius:12px;">🏠 Accueil</a>
 
   <select name="type" onchange="this.form.submit()">
     <option value="">Tous les types</option>

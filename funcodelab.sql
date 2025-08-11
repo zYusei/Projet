@@ -135,6 +135,62 @@ CREATE TABLE IF NOT EXISTS challenge_leaderboard (
   UNIQUE KEY uniq_user_period (period, period_start, user_id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS chat_messages (
+   id INT AUTO_INCREMENT PRIMARY KEY,
+   user_id INT NULL,
+   username VARCHAR(80) NOT NULL,
+   message TEXT NOT NULL,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ 
+CREATE INDEX idx_chat_created ON chat_messages(created_at);
+
+-- messages (threads, édition, pièces jointes, modération)
+ALTER TABLE chat_messages
+  ADD parent_id INT NULL,
+  ADD edited_at DATETIME NULL,
+  ADD attachment_url VARCHAR(255) NULL,
+  ADD is_deleted TINYINT(1) DEFAULT 0,
+  ADD is_flagged TINYINT(1) DEFAULT 0;
+
+CREATE INDEX idx_chat_parent ON chat_messages(parent_id);
+CREATE INDEX idx_chat_uid_time ON chat_messages(user_id, created_at);
+
+-- réactions
+CREATE TABLE IF NOT EXISTS chat_reactions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  message_id INT NOT NULL,
+  user_id INT NOT NULL,
+  emoji VARCHAR(8) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_react (message_id, user_id, emoji),
+  FOREIGN KEY (message_id) REFERENCES chat_messages(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- signalements
+CREATE TABLE IF NOT EXISTS chat_reports (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  message_id INT NOT NULL,
+  reporter_id INT NOT NULL,
+  reason VARCHAR(255) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (message_id) REFERENCES chat_messages(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- liste d’insultes / mots interdits (extensible)
+CREATE TABLE IF NOT EXISTS bad_words (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  word VARCHAR(128) UNIQUE NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- présence (simple)
+CREATE TABLE IF NOT EXISTS chat_presence (
+  user_id INT PRIMARY KEY,
+  username VARCHAR(80) NOT NULL,
+  last_seen TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  typing_until TIMESTAMP NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ---------- Safe schema tweaks (idempotent) ----------
 ALTER TABLE users
   ADD COLUMN IF NOT EXISTS avatar_url         VARCHAR(255) NULL AFTER email,
